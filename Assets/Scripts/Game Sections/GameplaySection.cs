@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -17,20 +16,30 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
     private List<int> cardsData;
     private bool[] cardsState;
     public override event Action<bool> OnSectionEnd;
+    protected override void Start()
+    {
+        sectionWidget.OnUICardClicked += OnCardPick;
+        sectionWidget.OnSectionEnd += EndSection;
+    }
     public override void DisableSection()
     {
         sectionEnabled = false;
         sectionWidget.DisableSection();
+        playerMatches = 0;
+        playerClicks = 0;
     }
 
     public override void EnableSection()
     {
         sectionEnabled = true;
         gameStateData = GameDataManager.Instance.GameState;
-        sectionWidget.OnUICardClicked += OnCardPick;
-        //sectionWidget.OnHomeBtnPressed += OnHomeBtnClicked;
         PrepareData();
         sectionWidget.EnableSection();
+    }
+    private void EndSection(bool advanceTo)
+    {
+        if (!advanceTo) GameDataManager.Instance.SaveState();
+        OnSectionEnd(false);
     }
     private void Update()
     {
@@ -67,16 +76,25 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
         int totalCards = Mathf.RoundToInt(gameStateData.layout.x * gameStateData.layout.y);
         cardsData = new List<int>();
         cardsState = new bool[totalCards];
-        cardsData = PopulateValues(totalCards);
+
+        if (!GameDataManager.Instance.SavedState)
+        {
+            cardsData = PopulateValues(totalCards);
+            gameStateData.cellsState = cardsState.ToArray();
+            gameStateData.cellsType = cardsData.ToArray();
+            GameDataManager.Instance.OverrideState(gameStateData);
+        }
+        else
+        {
+            cardsData = gameStateData.cellsType.ToList();
+            cardsState = gameStateData.cellsState.ToArray();
+            playerClicks = gameStateData.userClicks;
+            playerMatches = gameStateData.userMatches;
+        }
 
         sectionWidget.SetPlayerClicks(playerClicks);
         sectionWidget.SetPlayerScore(playerMatches);
-
-        gameStateData.cellsState = cardsState.ToArray();
-        gameStateData.cellsType = cardsData.ToArray();
-
-        GameDataManager.Instance.OverrideState(gameStateData);
-
+        
         visualOpenCards = new Dictionary<int, CardUI>();
         stateOpenCards = new Dictionary<int, CardUI>();
         openCardsTimer = new Dictionary<int, float>();
@@ -108,13 +126,12 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
         gameStateData.userClicks++;
         sectionWidget.SetPlayerClicks(playerClicks);
 
-        visualOpenCards.Add(card.CardIndex, card);
-        stateOpenCards.Add(card.CardIndex, card);
-
-        openCardsTimer.Add(card.CardIndex, cardTimer);
-
-        card.FlipCard(true,0);
-        CheckOpenCards();
+        card.FlipCard(true, 0.25f, () => {
+            visualOpenCards.Add(card.CardIndex, card);
+            stateOpenCards.Add(card.CardIndex, card);
+            openCardsTimer.Add(card.CardIndex, cardTimer);
+            CheckOpenCards();
+        });
     }
     private void CheckOpenCards()
     {
@@ -190,6 +207,7 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
     }
     private void EndGame()
     {
+        GameDataManager.Instance.DeleteState();
         // deal with game logic
         OnSectionEnd?.Invoke(true);
     }

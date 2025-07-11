@@ -23,8 +23,8 @@ public class StartWidget : WidgetBase
         OnClick_GameGridSelection(0);
         sectionGroup.EnableCanvasGroup();
         // check if there is an old game session we can continue
-        //if(check if there is an old game session)
-        loadGameBtn.SetActive(true);
+        if(GameDataManager.Instance.SavedState)
+            loadGameBtn.SetActive(true);
         //if not then
     }
 
@@ -40,6 +40,7 @@ public class StartWidget : WidgetBase
     /// </summary>
     public void OnClick_NewGameBtn()
     {
+        if(GameDataManager.Instance.SavedState) GameDataManager.Instance.DeleteState();
         mainStartSection.SetActive(false);
         newGameOptionsSection.SetActive(true);
     }

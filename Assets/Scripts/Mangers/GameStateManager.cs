@@ -47,7 +47,7 @@ public class GameStateManager : MonoBehaviour
     }
     private int GetPreviousIndex()
     {
-        if (currentSectionIndex - 1 >= 0) return currentSectionIndex + 1;
+        if (currentSectionIndex - 1 >= 0) return currentSectionIndex - 1;
         else return gameSections.Count - 1;
     }
 }

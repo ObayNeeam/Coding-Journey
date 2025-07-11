@@ -18,7 +18,6 @@ public class GameplayWidget : WidgetBase
     [SerializeField] private TextMeshProUGUI playerClicks;
 
     public event Action<CardUI> OnUICardClicked;
-    public event Action OnHomeBtnPressed;
 
     public override event Action<bool> OnSectionEnd;
 
@@ -27,8 +26,18 @@ public class GameplayWidget : WidgetBase
     public override void DisableSection()
     {
         sectionGroup.DisbaleCanvasGroup();
+        playerScore.text = string.Empty;
+        playerClicks.text = string.Empty;
+        // we can optimize this by reusing the card but for simplicity we will delete them
+        DeleteCards();
     }
-
+    private void DeleteCards()
+    {
+        for (int i = 0; i < cardContainer.childCount; i++)
+        {
+            Destroy(cardContainer.GetChild(i).gameObject);
+        }
+    }
     public override void EnableSection()
     {
         GameStateData state = GameDataManager.Instance.GameState;
@@ -39,6 +48,8 @@ public class GameplayWidget : WidgetBase
     }
     public void BuildGrid(int[] cardsData, bool[] cardsStates)
     {
+        // we can optimize this by using a factory pattren and Instantiating the cards and re-using them
+
         cards = new List<CardUI>();
         for (int i = 0; i < cardsData.Length; i++)
         {

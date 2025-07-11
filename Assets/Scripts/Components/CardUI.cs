@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System;
 
 public class CardUI : MonoBehaviour, IPointerDownHandler
 {
@@ -39,18 +40,25 @@ public class CardUI : MonoBehaviour, IPointerDownHandler
         if (!cardBtn.interactable) return;
         OnCardClick?.Invoke(this);
     }
-    public void FlipCard(bool reveal, float tweenTime)
+    public void FlipCard(bool reveal, float tweenTime,Action OnComplete = null)
     {
-        if (reveal)
+        TweenSequencer sequencer = new TweenSequencer(this);
+        sequencer.Append(this.Seq_TweenScaleX(0f, tweenTime, () =>
         {
-            mainImage.enabled = false;
-            childImage.enabled = true;
+            if (reveal)
+            {
+                mainImage.enabled = false;
+                childImage.enabled = true;
+            }
+            else
+            {
+                mainImage.enabled = true;
+                childImage.enabled = false;
+            }
         }
-        else
-        {
-            mainImage.enabled = true;
-            childImage.enabled = false;
-        }
+        ));
+        sequencer.Append(this.Seq_TweenScaleX(1f, tweenTime, OnComplete));
+        sequencer.Play();
     }
     public void SetBtnInteractable(bool state)
     {
