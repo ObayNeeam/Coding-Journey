@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -9,14 +10,17 @@ public class StartWidget : WidgetBase
     [SerializeField] private GameObject newGameOptionsSection;
     [SerializeField] private GameObject mainStartSection;
     [SerializeField] private TMP_Dropdown gridSizeDropdown;
-    public override void DisableWidget()
+
+    public override event Action<bool> OnSectionEnd;
+
+    public override void DisableSection(bool goNext)
     {
         // when we disable the section we reset the values
         mainStartSection.SetActive(true);
         newGameOptionsSection.SetActive(false);
     }
 
-    public override void EnableWidget()
+    public override void EnableSection()
     {
         // check if there is an old game session we can continue
         //if(check if there is an old game session)
@@ -41,7 +45,7 @@ public class StartWidget : WidgetBase
     }
     public void OnClick_StartGame()
     {
-        OnWidgetEnd?.Invoke();
+        OnSectionEnd?.Invoke(true);
     }
     public void OnClick_GameGridSelection(int optionIndex)
     {

@@ -1,23 +1,26 @@
-using UnityEngine;
+
+using System;
 
 /// <summary>
 /// start section will be responsible  on setting the game settings or loading a previous seassion from the desk
 /// </summary>
-public class StartSection : GameSectionBase
+public class StartSection : GameSectionBase<StartWidget>
 {
+    public override event Action<bool> OnSectionEnd;
+
     protected override void Start()
     {
         base.Start();
-        sectionWidget.OnWidgetEnd.AddListener(DisableSection);
-    }
-    public override void DisableSection()
-    {
-        // call the game manager to go to the next section
-        Debug.Log("go to Next Section");
+        sectionWidget.OnSectionEnd+=DisableSection;
     }
 
     public override void EnableSection()
     {
-        sectionWidget.EnableWidget();
+        sectionWidget.EnableSection();
+    }
+
+    public override void DisableSection(bool advance)
+    {
+        throw new System.NotImplementedException();
     }
 }
