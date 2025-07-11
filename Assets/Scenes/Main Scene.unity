@@ -1086,6 +1086,50 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 1
+--- !u!1 &672788614
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 672788616}
+  - component: {fileID: 672788615}
+  m_Layer: 0
+  m_Name: Game Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &672788615
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 672788614}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d80c1a4c2c69d242864f725ccca893f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &672788616
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 672788614}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 113.30548, y: 61.05065, z: -1.0526392}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &675170271
 GameObject:
   m_ObjectHideFlags: 0
@@ -3021,6 +3065,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 133755bf28cea7c47bf572b3f9b1c485, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sectionWidget: {fileID: 1125691879}
 --- !u!4 &1839782799
 Transform:
   m_ObjectHideFlags: 0
@@ -3281,9 +3326,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c00f3151cd77a74fb91530232f78983, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OnWidgetEnd:
-    m_PersistentCalls:
-      m_Calls: []
   loadGameBtn: {fileID: 1340016868}
   newGameOptionsSection: {fileID: 435708291}
   mainStartSection: {fileID: 1107704121}
