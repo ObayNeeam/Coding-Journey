@@ -1,7 +1,10 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public abstract class GameSectionBase : MonoBehaviour
 {
+    [SerializeField] protected WidgetBase sectionWidget;
+    protected virtual void Start() {}
     /// <summary>
     /// this method will be responsiable for enabling a certain game section when called
     /// </summary>
