@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class GameDataManager : MonoBehaviour
 {
-    public GameDataManager Instance {  get; private set; }
+    public static GameDataManager Instance {  get; private set; }
 
-    GameStateData gameStateData;
+    public GameStateData GameState {  get; private set; }
     private void Awake()
     {
-        if(Instance==null) Instance = this;
+        if(Instance == null) Instance = this;
         else
         {
             Destroy(Instance.gameObject);
@@ -17,14 +17,14 @@ public class GameDataManager : MonoBehaviour
     }
     public void Start()
     {
-        gameStateData = new GameStateData();
+        GameState = new GameStateData();
     }
     public void SetLayoutState(int rows, int cols)
     {
-        gameStateData.layout = new Vector2(rows, cols);
+        GameState.layout = new Vector2(rows, cols);
     }
     public void OverrideState(GameStateData gameStateData)
     {
-    this.gameStateData = gameStateData;
+        GameState = gameStateData;
     }
 }

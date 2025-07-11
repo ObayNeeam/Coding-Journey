@@ -11,16 +11,21 @@ public class StartSection : GameSectionBase<StartWidget>
     protected override void Start()
     {
         base.Start();
-        sectionWidget.OnSectionEnd+=DisableSection;
+        sectionWidget.OnSectionEnd+= EndSection;
     }
 
     public override void EnableSection()
     {
+        sectionEnabled = true;
         sectionWidget.EnableSection();
     }
-
-    public override void DisableSection(bool advance)
+    private void EndSection(bool advance)
     {
-        throw new System.NotImplementedException();
+        OnSectionEnd?.Invoke(advance);
+    }
+    public override void DisableSection()
+    {
+        sectionEnabled = false;
+        sectionWidget.DisableSection();
     }
 }

@@ -4,29 +4,39 @@ using UnityEngine;
 
 public class GameStateManager : MonoBehaviour
 {
-    [SerializeField] private List<ISection> gameSections;
+    [SerializeField] private List<GameObject> gameSectionsObj;
+    private List<ISection> gameSections;
     private int currentSectionIndex;
     // Start is called before the first frame update
     void Start()
     {
         // our game entry point
         // we enable the first section in the game
+        GetGameSections();
         currentSectionIndex = 0;
         EnableSection(currentSectionIndex);
     }
+    private void GetGameSections()
+    {
+        gameSections = new();
+        foreach (GameObject section in gameSectionsObj)
+        {
+            gameSections.Add(section.GetComponent<ISection>());
+        }
+    }
     private void EnableSection(int sectionIndex)
     {
-        gameSections[sectionIndex].EnableSection();
         gameSections[sectionIndex].OnSectionEnd += GoSection;
+        gameSections[sectionIndex].EnableSection();
     }
-    private void DisableSection(int sectionIndex, bool advanceTo)
+    private void DisableSection(int sectionIndex)
     {
-        gameSections[sectionIndex].DisableSection(advanceTo);
+        gameSections[sectionIndex].DisableSection();
         gameSections[sectionIndex].OnSectionEnd-=GoSection;
     }
     public void GoSection(bool advanceTo)
     {
-        DisableSection(currentSectionIndex, advanceTo);
+        DisableSection(currentSectionIndex);
         currentSectionIndex = advanceTo? GetNextIndex() : GetPreviousIndex();
         EnableSection(currentSectionIndex);
     }

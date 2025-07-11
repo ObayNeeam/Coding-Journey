@@ -7,6 +7,7 @@ public abstract class GameSectionBase<IWidget> : MonoBehaviour, ISection where I
 
     public abstract event Action<bool> OnSectionEnd;
 
+    protected bool sectionEnabled;
     /// <summary>
     /// Pass true if you want to go to the next section
     /// </summary>
@@ -16,5 +17,5 @@ public abstract class GameSectionBase<IWidget> : MonoBehaviour, ISection where I
     /// <summary>
     /// this method will be responsiable for disabling a certain game section when called
     /// </summary>
-    public abstract void DisableSection(bool goNext);
+    public abstract void DisableSection();
 }

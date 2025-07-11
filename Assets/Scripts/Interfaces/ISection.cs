@@ -14,5 +14,5 @@ public interface ISection
     /// <summary>
     /// this method will be responsiable for disabling a certain game section when called
     /// </summary>
-    public void DisableSection(bool goNext);
+    public void DisableSection();
 }

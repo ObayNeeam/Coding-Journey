@@ -9,12 +9,14 @@ using UnityEngine.Events;
 /// </summary>
 public abstract class WidgetBase : MonoBehaviour, ISection
 {
+    [SerializeField] protected CanvasGroup sectionGroup;
     /// <summary>
     /// An event for letting the logic section class know when to move on from to the next section
     /// </summary>
     public abstract event Action<bool> OnSectionEnd;
 
-    public abstract void DisableSection(bool advance);
+    public abstract void DisableSection();
 
     public abstract void EnableSection();
+
 }

@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class GameplaySection : GameSectionBase<GameplayWidget>
+public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
 {
     [SerializeField, Range(1f, 10f)] private float cardTimer = 5f;
 
-    private Dictionary<int, GameObject> visualOpenCards;
-    private Dictionary<int, GameObject> stateOpenCards;
+    private Dictionary<int, CardUI> visualOpenCards;
+    private Dictionary<int, CardUI> stateOpenCards;
     private Dictionary<int, float> openCardsTimer;
     GameStateData gameStateData;
     private int playerMatches;
@@ -17,13 +17,50 @@ public class GameplaySection : GameSectionBase<GameplayWidget>
     private List<int> cardsData;
     private bool[] cardsState;
     public override event Action<bool> OnSectionEnd;
-    public override void DisableSection(bool goNext)
+    public override void DisableSection()
     {
+        sectionEnabled = false;
+        sectionWidget.DisableSection();
     }
 
     public override void EnableSection()
     {
+        sectionEnabled = true;
+        gameStateData = GameDataManager.Instance.GameState;
+        sectionWidget.OnUICardClicked += OnCardPick;
+        //sectionWidget.OnHomeBtnPressed += OnHomeBtnClicked;
         PrepareData();
+        sectionWidget.EnableSection();
+    }
+    private void Update()
+    {
+        if (!sectionEnabled) return;
+
+        if (openCardsTimer.Count <= 0) return;
+
+        List<int> cardsToRemove = new List<int>();
+        List<int> cardsKeys = new List<int>(openCardsTimer.Keys);
+        foreach (int key in cardsKeys)
+        {
+            if (cardsState[key]) continue;
+
+            openCardsTimer[key] -= Time.deltaTime;
+
+            if (openCardsTimer[key] <= 0) cardsToRemove.Add(key);
+        }
+        RemoveIdleCards(cardsToRemove);
+    }
+    private void RemoveIdleCards(List<int> cardsToRemove)
+    {
+        foreach (int index in cardsToRemove)
+        {
+            openCardsTimer.Remove(index);
+            if (stateOpenCards.ContainsKey(index)) stateOpenCards.Remove(index);
+            CardUI card = visualOpenCards[index];
+            visualOpenCards.Remove(index);
+            card.FlipCard(false, 0.25f);
+            card.SetBtnInteractable(true);
+        }
     }
     private void PrepareData()
     {
@@ -31,11 +68,17 @@ public class GameplaySection : GameSectionBase<GameplayWidget>
         cardsData = new List<int>();
         cardsState = new bool[totalCards];
         cardsData = PopulateValues(totalCards);
+
+        sectionWidget.SetPlayerClicks(playerClicks);
+        sectionWidget.SetPlayerScore(playerMatches);
+
         gameStateData.cellsState = cardsState.ToArray();
         gameStateData.cellsType = cardsData.ToArray();
 
-        visualOpenCards = new Dictionary<int, GameObject>();
-        stateOpenCards = new Dictionary<int, GameObject>();
+        GameDataManager.Instance.OverrideState(gameStateData);
+
+        visualOpenCards = new Dictionary<int, CardUI>();
+        stateOpenCards = new Dictionary<int, CardUI>();
         openCardsTimer = new Dictionary<int, float>();
     }
     private List<int> PopulateValues(int totalCards)
@@ -56,5 +99,98 @@ public class GameplaySection : GameSectionBase<GameplayWidget>
             possiableIndexes.RemoveAt(secondIndex);
         }
         return cardsValues.ToList();
+    }
+    private void OnCardPick(CardUI card)
+    {
+        card.SetBtnInteractable(false);
+
+        playerClicks++;
+        gameStateData.userClicks++;
+        sectionWidget.SetPlayerClicks(playerClicks);
+
+        visualOpenCards.Add(card.CardIndex, card);
+        stateOpenCards.Add(card.CardIndex, card);
+
+        openCardsTimer.Add(card.CardIndex, cardTimer);
+
+        card.FlipCard(true,0);
+        CheckOpenCards();
+    }
+    private void CheckOpenCards()
+    {
+        //if (stateOpenCards.Count <= 1) return;
+
+        List<int> keys = new List<int>(stateOpenCards.Keys);
+        for (int i = 0; i < keys.Count; i += 2)
+        {
+            if (i + 1 >= keys.Count)
+            {
+                //stateOpenCards.Remove(keys[i]);
+                break;
+            }
+
+            int key1 = keys[i];
+            int key2 = keys[i + 1];
+            CardUI card1 = stateOpenCards[key1];
+            CardUI card2 = stateOpenCards[key2];
+            //if (openCards[key].CardType == card.CardType && openCards[key].CardIndex != card.CardIndex && !cardsState[key])
+            if (IsOpenValid(card1, card2))
+            {
+                Debug.Log($"A Match Index {card1.CardIndex} and {card2.CardIndex} | Type {card1.CardType}");
+                HandleMatchingCards(key1, key2);
+                continue;
+            }
+            else
+            {
+                stateOpenCards.Remove(key1);
+                stateOpenCards.Remove(key2);
+
+            }
+        }
+    }
+    private bool IsOpenValid(CardUI card1, CardUI card2)
+    {
+        return 
+            card1.CardType == card2.CardType &&
+            card1.CardIndex != card2.CardIndex &&
+            !cardsState[card1.CardIndex];
+    }
+    private void HandleMatchingCards(int key1, int key2)
+    {
+        cardsState[key1] = true;
+        cardsState[key2] = true;
+
+        gameStateData.cellsState = cardsState;
+        playerMatches++;
+        gameStateData.userMatches++;
+
+        sectionWidget.SetPlayerScore(playerMatches);
+
+        openCardsTimer.Remove(key1);
+        openCardsTimer.Remove(key2);
+
+        stateOpenCards[key1].SetBtnInteractable(false);
+        stateOpenCards[key2].SetBtnInteractable(false);
+
+        stateOpenCards.Remove(key1);
+        stateOpenCards.Remove(key2);
+
+        visualOpenCards.Remove(key1);
+        visualOpenCards.Remove(key2);
+
+        CheckGameEnding();
+    }
+    private void CheckGameEnding()
+    {
+        foreach (bool cellState in cardsState)
+        {
+            if (!cellState) return;
+        }
+        EndGame();
+    }
+    private void EndGame()
+    {
+        // deal with game logic
+        OnSectionEnd?.Invoke(true);
     }
 }
