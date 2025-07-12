@@ -20,7 +20,6 @@ public class StartWidget : WidgetBase
 
     public override void EnableSection()
     {
-        OnClick_GameGridSelection(0);
         sectionGroup.EnableCanvasGroup();
         // check if there is an old game session we can continue
         if(GameDataManager.Instance.SavedState)
@@ -42,6 +41,7 @@ public class StartWidget : WidgetBase
     public void OnClick_NewGameBtn()
     {
         if(GameDataManager.Instance.SavedState) GameDataManager.Instance.DeleteState();
+        OnClick_GameGridSelection(0);
         mainStartSection.SetActive(false);
         newGameOptionsSection.SetActive(true);
     }
