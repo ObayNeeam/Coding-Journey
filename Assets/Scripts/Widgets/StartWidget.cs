@@ -25,7 +25,8 @@ public class StartWidget : WidgetBase
         // check if there is an old game session we can continue
         if(GameDataManager.Instance.SavedState)
             loadGameBtn.SetActive(true);
-        //if not then
+        else
+            loadGameBtn.SetActive(false);
     }
 
     public void OnClick_LoadGameBtn()

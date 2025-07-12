@@ -15,6 +15,7 @@ public class GameplayWidget : WidgetBase
     [SerializeField] private List<Sprite> cardsSpriteTypes;
 
     [SerializeField] private TextMeshProUGUI playerScore;
+    [SerializeField] private TextMeshProUGUI playerCombo;
     [SerializeField] private TextMeshProUGUI playerClicks;
 
     public event Action<CardUI> OnUICardClicked;
@@ -100,6 +101,10 @@ public class GameplayWidget : WidgetBase
     public void SetPlayerScore(int value)
     {
         playerScore.text = value.ToString();
+    }
+    public void SetPlayerCombo(int value)
+    {
+        playerCombo.text = value.ToString();
     }
     public void SetPlayerClicks(int value)
     {

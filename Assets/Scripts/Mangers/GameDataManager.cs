@@ -12,13 +12,17 @@ public class GameDataManager : MonoBehaviour
     public GameStateData GameState {  get; private set; }
     private void Awake()
     {
-        if(Instance == null) Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+            Init();
+        }
         else
         {
             Destroy(Instance.gameObject);
         }
     }
-    public void Start()
+    public void Init()
     {
         gameStatePath = Path.Combine(Application.streamingAssetsPath, "GameState.json");
         if(!Directory.Exists(Application.streamingAssetsPath)) Directory.CreateDirectory(Application.streamingAssetsPath);
@@ -38,6 +42,7 @@ public class GameDataManager : MonoBehaviour
     }
     public void SaveState()
     {
+        SavedState = true;
         string content = JsonUtility.ToJson(GameState);
         File.WriteAllText(gameStatePath, content);
     }
@@ -53,5 +58,6 @@ public class GameDataManager : MonoBehaviour
         if (!File.Exists(gameStatePath)) return;
         SavedState = false;
         File.Delete(gameStatePath);
+        GameState = new GameStateData();
     }
 }

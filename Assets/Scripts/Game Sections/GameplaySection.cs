@@ -11,8 +11,6 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
     private Dictionary<int, CardUI> stateOpenCards;
     private Dictionary<int, float> openCardsTimer;
     GameStateData gameStateData;
-    private int playerMatches;
-    private int playerClicks;
     private List<int> cardsData;
     private bool[] cardsState;
     public override event Action<bool> OnSectionEnd;
@@ -25,8 +23,6 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
     {
         sectionEnabled = false;
         sectionWidget.DisableSection();
-        playerMatches = 0;
-        playerClicks = 0;
     }
 
     public override void EnableSection()
@@ -38,8 +34,12 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
     }
     private void EndSection(bool advanceTo)
     {
-        if (!advanceTo) GameDataManager.Instance.SaveState();
-        OnSectionEnd(false);
+        if (!advanceTo)
+        {
+            GameDataManager.Instance.OverrideState(gameStateData);
+            GameDataManager.Instance.SaveState();
+        }
+            OnSectionEnd(false);
     }
     private void Update()
     {
@@ -88,12 +88,13 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
         {
             cardsData = gameStateData.cellsType.ToList();
             cardsState = gameStateData.cellsState.ToArray();
-            playerClicks = gameStateData.userClicks;
-            playerMatches = gameStateData.userMatches;
+            //playerClicks = gameStateData.userClicks;
+            //playerMatches = gameStateData.userMatches;
         }
 
-        sectionWidget.SetPlayerClicks(playerClicks);
-        sectionWidget.SetPlayerScore(playerMatches);
+        sectionWidget.SetPlayerClicks(gameStateData.userClicks);
+        sectionWidget.SetPlayerScore(gameStateData.userMatches);
+        sectionWidget.SetPlayerCombo(gameStateData.combos);
         
         visualOpenCards = new Dictionary<int, CardUI>();
         stateOpenCards = new Dictionary<int, CardUI>();
@@ -121,10 +122,10 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
     private void OnCardPick(CardUI card)
     {
         card.SetBtnInteractable(false);
-
-        playerClicks++;
+        AudioManager.Instance.PlayCardFlip();
+        //playerClicks++;
         gameStateData.userClicks++;
-        sectionWidget.SetPlayerClicks(playerClicks);
+        sectionWidget.SetPlayerClicks(gameStateData.userClicks);
 
         card.FlipCard(true, 0.25f, () => {
             visualOpenCards.Add(card.CardIndex, card);
@@ -154,6 +155,7 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
             if (IsOpenValid(card1, card2))
             {
                 Debug.Log($"A Match Index {card1.CardIndex} and {card2.CardIndex} | Type {card1.CardType}");
+                AudioManager.Instance.PlayCardMatch();
                 HandleMatchingCards(key1, key2);
                 continue;
             }
@@ -161,7 +163,9 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
             {
                 stateOpenCards.Remove(key1);
                 stateOpenCards.Remove(key2);
-
+                gameStateData.combos = 0;
+                sectionWidget.SetPlayerCombo(gameStateData.combos);
+                AudioManager.Instance.PlayCardMismatch();
             }
         }
     }
@@ -178,14 +182,15 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
         cardsState[key2] = true;
 
         gameStateData.cellsState = cardsState;
-        playerMatches++;
+        //playerMatches++;
         gameStateData.userMatches++;
 
-        sectionWidget.SetPlayerScore(playerMatches);
+        sectionWidget.SetPlayerScore(gameStateData.userMatches);
 
         openCardsTimer.Remove(key1);
         openCardsTimer.Remove(key2);
-
+        CheckCombo();
+        gameStateData.lastCorrectMatch = gameStateData.userClicks;
         stateOpenCards[key1].SetBtnInteractable(false);
         stateOpenCards[key2].SetBtnInteractable(false);
 
@@ -196,6 +201,18 @@ public class GameplaySection : GameSectionBase<GameplayWidget>, ISection
         visualOpenCards.Remove(key2);
 
         CheckGameEnding();
+    }
+    private void CheckCombo()
+    {
+        if (gameStateData.lastCorrectMatch != 0)
+        {
+            if (gameStateData.userClicks - gameStateData.lastCorrectMatch == 2)
+            {
+                gameStateData.combos++;
+
+            }
+            sectionWidget.SetPlayerCombo(gameStateData.combos);
+        }
     }
     private void CheckGameEnding()
     {

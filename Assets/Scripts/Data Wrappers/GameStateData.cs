@@ -7,5 +7,7 @@ public class GameStateData
     public int[] cellsType;
     public int userClicks;
     public int userMatches;
+    public int combos;
+    public int lastCorrectMatch;
     public Vector2 layout;
 }
